@@ -4,7 +4,7 @@
 // Second practical assignement (speed run)
 //
 // Place your student numbers and names here
-//   N.Mec. XXXXXX  Name: XXXXXXX
+//   N.Mec. 108713  Name: Liliana Ribeiro
 //
 // Do as much as you can
 //   1) MANDATORY: complete the hash table code
