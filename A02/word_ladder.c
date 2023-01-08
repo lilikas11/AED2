@@ -170,8 +170,11 @@ static hash_table_t *hash_table_create(void)
   }
 
   /* students code */
+  // choose size for the hash table (prime number)
   unsigned int size = 107;
-  hash_table->hash_table_size = size; //TODO: fazer o size
+  
+  // save hash table atributes
+  hash_table->hash_table_size = size;
   hash_table->number_of_entries = 0u;
   hash_table->number_of_edges = 0u;
 
