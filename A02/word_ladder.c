@@ -170,7 +170,8 @@ static hash_table_t *hash_table_create(void)
   }
 
   /* students code */
-  hash_table->hash_table_size = 107u; //TODO: fazer o size
+  unsigned int size = 107;
+  hash_table->hash_table_size = size; //TODO: fazer o size
   hash_table->number_of_entries = 0u;
   hash_table->number_of_edges = 0u;
 
