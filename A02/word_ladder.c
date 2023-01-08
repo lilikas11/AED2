@@ -168,9 +168,22 @@ static hash_table_t *hash_table_create(void)
     fprintf(stderr,"create_hash_table: out of memory\n");
     exit(1);
   }
-  //
-  // complete this
-  //
+
+  /* students code */
+  hash_table->hash_table_size = 107u; //TODO: fazer o size
+  hash_table->number_of_entries = 0u;
+  hash_table->number_of_edges = 0u;
+
+  hash_table->heads = (hash_table_node_t **)malloc(size * sizeof(hash_table_node_t *));
+  if(hash_table->heads == NULL) {
+    fprintf(stderr,"create_hash_table: out of memory\n");
+    exit(1);
+  }
+
+  for(i = 0;i < size;i++)
+    hash_table->heads[i] = NULL;
+
+  /* end code */
   return hash_table;
 }
 
