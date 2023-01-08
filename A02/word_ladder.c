@@ -157,6 +157,7 @@ unsigned int crc32(const char *str)
   return crc;
 }
 
+// hash_table_create is a function that returns a empty table with size 107
 static hash_table_t *hash_table_create(void)
 {
   hash_table_t *hash_table;
@@ -172,7 +173,7 @@ static hash_table_t *hash_table_create(void)
   /* students code */
   // choose size for the hash table (prime number)
   unsigned int size = 107;
-  
+
   // save hash table atributes
   hash_table->hash_table_size = size;
   hash_table->number_of_entries = 0u;
@@ -191,11 +192,46 @@ static hash_table_t *hash_table_create(void)
   return hash_table;
 }
 
+//hash_table_grow is a function that double the size of an hash_table preserving the old heads
 static void hash_table_grow(hash_table_t *hash_table)
 {
-  //
-  // complete this
-  //
+  /* students code */
+  // variables to save old and new values
+  hash_table_node_t **heads, **new_heads;
+  hash_table_node_t *node, *next_node;
+  unsigned int size, new_size;
+  unsigned int i;
+
+  // save old values
+  heads = hash_table->heads;
+  size = hash_table->hash_table_size;
+
+  // new values (new size -> double the size)
+  new_size = size * 2u;
+  new_heads = (hash_table_node_t **)malloc(new_size * sizeof(hash_table_node_t *));
+  if(new_heads == NULL) {
+    fprintf(stderr,"hash_table_grow: out of memory\n");
+    exit(1);
+  }
+
+  for(i = 0u; i < new_size; i++)
+    new_heads[i] = NULL;
+
+  // do the hash function for the new size (and save on new_heads)
+  // go throught all the heads and replace them for the new hash function calculate
+  for(i = 0u; i < size; i++)
+    for(node = heads; node != NULL; node = next_node)
+    {
+      next_node = node->next;
+      node->next = new_heads[crc32(node->word) % new_size];
+      new_heads[crc32(node->word) % new_size] = node;
+    }
+
+  // replace hash table old values (size e head) for new values
+  free(heads);
+  hash_table->hash_table_size = new_size;
+  hash_table->heads = new_heads;
+  /* end code */
 }
 
 static void hash_table_free(hash_table_t *hash_table)
