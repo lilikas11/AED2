@@ -241,7 +241,7 @@ static void hash_table_free(hash_table_t *hash_table)
   hash_table_node_t *node, *next_node;
   adjacency_node_t *adj_node, *next_adj_node;
   // Iterate over all the elements in the hash table
-  for (i = 0; i < hash_table->hash_table_size; i++)
+  for (i = 0u; i < hash_table->hash_table_size; i++)
   {
     // Free the linked list of hash table nodes
     node = hash_table->heads[i];
