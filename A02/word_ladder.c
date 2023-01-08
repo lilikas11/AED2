@@ -268,17 +268,57 @@ static void hash_table_free(hash_table_t *hash_table)
   free(hash_table);
 }
 
-static hash_table_node_t *find_word(hash_table_t *hash_table,const char *word,int insert_if_not_found)
+static hash_table_node_t *find_word(hash_table_t *hash_table, const char *word, int insert_if_not_found)
 {
   hash_table_node_t *node;
   unsigned int i;
 
   i = crc32(word) % hash_table->hash_table_size;
-  //
-  // complete this
-  //
+
+  // Search the linked list at the corresponding index in the hash table array for a node with the same word
+  node = hash_table->heads[i];
+  while (node != NULL)
+  {
+    if (strcmp(node->word, word) == 0)
+    {
+      // Return a pointer to the node if the word is found
+      return node;
+    }
+    node = node->next;
+  }
+
+  // If the insert_if_not_found flag is set, insert a new node with the word
+  if (insert_if_not_found)
+  {
+    node = (hash_table_node_t *)malloc(sizeof(hash_table_node_t));
+    if (node == NULL)
+    {
+      // Handle error: unable to allocate memory
+      return NULL;
+    }
+    strcpy(node->word, word);
+    node->next = hash_table->heads[i];
+    hash_table->heads[i] = node;
+    hash_table->number_of_entries++;
+    // Initialize the vertex data
+    node->head = NULL;
+    node->visited = 0;
+    node->previous = NULL;
+    // Initialize the union find data
+    node->representative = node;
+    node->number_of_vertices = 1;
+    node->number_of_edges = 0;
+  }
+  else
+  {
+    // Return NULL if the word is not found and the insert_if_not_found flag is not set
+    return NULL;
+  }
+
+  // Return a pointer to the newly inserted node if the insert_if_not_found flag is set
   return node;
 }
+
 
 
 //
