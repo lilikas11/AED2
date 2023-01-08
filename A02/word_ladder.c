@@ -171,6 +171,11 @@ static hash_table_t *hash_table_create(void)
   //
   // complete this
   //
+  unsigned int hash_table_size;      // the size of the hash table array
+  unsigned int number_of_entries;    // the number of entries in the hash table
+  unsigned int number_of_edges;      // number of edges (for information purposes only)
+  hash_table_node_t **heads;  
+  //
   return hash_table;
 }
 
@@ -181,11 +186,37 @@ static void hash_table_grow(hash_table_t *hash_table)
   //
 }
 
+// hash_table_free: This function should free all the memory used by the hash table.
 static void hash_table_free(hash_table_t *hash_table)
 {
-  //
-  // complete this
-  //
+  int i;
+  hash_table_node_t *node, *next_node;
+  adjacency_node_t *adj_node, *next_adj_node;
+  // Iterate over all the elements in the hash table
+  for (i = 0; i < hash_table->hash_table_size; i++)
+  {
+    // Free the linked list of hash table nodes
+    node = hash_table->heads[i];
+    while (node)
+    {
+      next_node = node->next;
+      // Free the linked list of adjacency nodes
+      adj_node = node->head;
+      while (adj_node)
+      {
+        next_adj_node = adj_node->next;
+        free(adj_node);
+        adj_node = next_adj_node;
+      }
+      free(node);
+      node = next_node;
+    }
+  }
+
+  // Free the array of linked list heads
+  free(hash_table->heads);
+
+  // Free the hash table structure itself
   free(hash_table);
 }
 
