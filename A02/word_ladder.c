@@ -220,12 +220,13 @@ static void hash_table_grow(hash_table_t *hash_table)
   // do the hash function for the new size (and save on new_heads)
   // go throught all the heads and replace them for the new hash function calculate
   for(i = 0u; i < size; i++)
-    for(node = heads; node != NULL; node = next_node)
+    for(node = heads[i]; node != NULL; node = next_node)
     {
       next_node = node->next;
       node->next = new_heads[crc32(node->word) % new_size];
       new_heads[crc32(node->word) % new_size] = node;
     }
+
 
   // replace hash table old values (size e head) for new values
   free(heads);
@@ -237,7 +238,7 @@ static void hash_table_grow(hash_table_t *hash_table)
 // hash_table_free: This function should free all the memory used by the hash table.
 static void hash_table_free(hash_table_t *hash_table)
 {
-  int i;
+  unsigned int i;
   hash_table_node_t *node, *next_node;
   adjacency_node_t *adj_node, *next_adj_node;
   // Iterate over all the elements in the hash table
