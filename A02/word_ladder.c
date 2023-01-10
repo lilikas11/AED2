@@ -187,83 +187,42 @@ static hash_table_t *hash_table_create(void)
 static void hash_table_grow(hash_table_t *hash_table)
 {
   /* students code */
-  hash_table_node_t **old_heads, **new_heads;
+  // variables to save old and new values
+  hash_table_node_t **heads, **new_heads;
   hash_table_node_t *node, *next_node;
-  unsigned int i, old_hash_table_size;
+  unsigned int size, new_size;
+  unsigned int i;
 
-  // save the old hash table
-  old_heads = hash_table->heads;
-  old_hash_table_size = hash_table->hash_table_size;
+  // save old values
+  heads = hash_table->heads;
+  size = hash_table->hash_table_size;
 
-  // double the size of the hash table
-  hash_table->hash_table_size *= 2u;
-  new_heads = (hash_table_node_t **)malloc(hash_table->hash_table_size * sizeof(hash_table_node_t *));
-  // check for out of memory
-  for (i = 0u; i < hash_table->hash_table_size; i++)
+  // new values (new size -> double the size)
+  new_size = size * 2u;
+  new_heads = (hash_table_node_t **)malloc(new_size * sizeof(hash_table_node_t *));
+
+  for (i = 0u; i < new_size; i++)
     new_heads[i] = NULL;
 
   if (new_heads == NULL)
   {
-    fprintf(stderr, "hash_table_grow: out of memory");
+    fprintf(stderr, "hash_table_grow: out of memory\n");
     exit(1);
   }
 
-  // run the hash function for old values with new size
-
-  for (i = 0u; i < old_hash_table_size; i++)
-  {
-    node = old_heads[i];
-    while (node != NULL)
+  // do the hash function for the new size (and save on new_heads)
+  // go throught all the heads and replace them for the new hash function calculate
+  for (i = 0u; i < size; i++)
+    for (node = heads[i]; node != NULL; node = next_node)
     {
-
       next_node = node->next;
-
-      size_t index = crc32(node->word) % hash_table->hash_table_size;
-      node->next = new_heads[index];
-      new_heads[index] = node;
-
-      node = next_node;
+      node->next = new_heads[crc32(node->word) % new_size];
+      new_heads[crc32(node->word) % new_size] = node;
     }
-  }
-  free(old_heads);
+  // replace hash table old values (size e head) for new values
+  free(heads);
+  hash_table->hash_table_size = new_size;
   hash_table->heads = new_heads;
-  /*aiiiiiiiiii*/
-  // // variables to save old and new values
-  // hash_table_node_t **heads, **new_heads;
-  // hash_table_node_t *node, *next_node;
-  // unsigned int size, new_size;
-  // unsigned int i;
-
-  // // save old values
-  // heads = hash_table->heads;
-  // size = hash_table->hash_table_size;
-
-  // // new values (new size -> double the size)
-  // new_size = size * 2u;
-  // new_heads = (hash_table_node_t **)malloc(new_size * sizeof(hash_table_node_t *));
-
-  // for (i = 0u; i < new_size; i++)
-  //   new_heads[i] = NULL;
-
-  // if (new_heads == NULL)
-  // {
-  //   fprintf(stderr, "hash_table_grow: out of memory\n");
-  //   exit(1);
-  // }
-
-  // // do the hash function for the new size (and save on new_heads)
-  // // go throught all the heads and replace them for the new hash function calculate
-  // for (i = 0u; i < size; i++)
-  //   for (node = heads[i]; node != NULL; node = next_node)
-  //   {
-  //     next_node = node->next;
-  //     node->next = new_heads[crc32(node->word) % new_size];
-  //     new_heads[crc32(node->word) % new_size] = node;
-  //   }
-  // // replace hash table old values (size e head) for new values
-  // free(heads);
-  // hash_table->hash_table_size = new_size;
-  // hash_table->heads = new_heads;
   /* end code */
 }
 
@@ -271,59 +230,36 @@ static void hash_table_grow(hash_table_t *hash_table)
 static void hash_table_free(hash_table_t *hash_table)
 {
   /* students code */
-  hash_table_node_t *node, *next_node;
   unsigned int i;
+  hash_table_node_t *node, *next_node;
+  adjacency_node_t *adj_node, *next_adj_node;
+  // Iterate over all the elements in the hash table
   for (i = 0u; i < hash_table->hash_table_size; i++)
   {
+    // Free the linked list of hash table nodes
     node = hash_table->heads[i];
-    while (node != NULL)
+    while (node)
     {
-      adjacency_node_t *adjNode = node->head, *tempAdjNode;
-      while (adjNode != NULL)
-      {
-        tempAdjNode = adjNode->next;
-        free_adjacency_node(adjNode);
-        adjNode = tempAdjNode;
-      }
       next_node = node->next;
-      free_hash_table_node(node);
+      // Free the linked list of adjacency nodes
+      adj_node = node->head;
+      while (adj_node)
+      {
+        next_adj_node = adj_node->next;
+        free(adj_node);
+        adj_node = next_adj_node;
+      }
+      free(node);
       node = next_node;
     }
+    /* end code */
   }
 
+  // Free the array of linked list heads
   free(hash_table->heads);
+
+  // Free the hash table structure itself
   free(hash_table);
-  /* aiiiiiiiiiiiiiiiiiiiiii */
-  // unsigned int i;
-  // hash_table_node_t *node, *next_node;
-  // adjacency_node_t *adj_node, *next_adj_node;
-  // // Iterate over all the elements in the hash table
-  // for (i = 0u; i < hash_table->hash_table_size; i++)
-  // {
-  //   // Free the linked list of hash table nodes
-  //   node = hash_table->heads[i];
-  //   while (node)
-  //   {
-  //     next_node = node->next;
-  //     // Free the linked list of adjacency nodes
-  //     adj_node = node->head;
-  //     while (adj_node)
-  //     {
-  //       next_adj_node = adj_node->next;
-  //       free(adj_node);
-  //       adj_node = next_adj_node;
-  //     }
-  //     free(node);
-  //     node = next_node;
-  //   }
-  //   /* end code */
-  // }
-
-  // // Free the array of linked list heads
-  // free(hash_table->heads);
-
-  // // Free the hash table structure itself
-  // free(hash_table);
 }
 
 static hash_table_node_t *find_word(hash_table_t *hash_table, const char *word, int insert_if_not_found)
