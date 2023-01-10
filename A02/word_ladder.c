@@ -322,31 +322,19 @@ static hash_table_node_t *find_word(hash_table_t *hash_table, const char *word, 
 
 static hash_table_node_t *find_representative(hash_table_node_t *node)
 {
-  hash_table_node_t *Representative, *next_node, *temp_node;
+  hash_table_node_t *representative, *next_node;
 
-  for (Representative = node; Representative != Representative->representative; Representative = Representative->representative)
-    ;
-
-  for (next_node = node; next_node != Representative; next_node = temp_node)
+  /* students code */
+  // Follow the chain of representatives until the representative of the connected component is found
+  representative = node;
+  next_node = node->representative;
+  while (next_node != representative)
   {
-    temp_node = next_node->representative;
-    next_node->representative = Representative;
+    representative = next_node;
+    next_node = representative->representative;
   }
-
-  return Representative;
-  // hash_table_node_t *representative, *next_node;
-
-  // /* students code */
-  // // Follow the chain of representatives until the representative of the connected component is found
-  // representative = node;
-  // next_node = node->representative;
-  // while (next_node != representative)
-  // {
-  //   representative = next_node;
-  //   next_node = representative->representative;
-  // }
-  // /* end code */
-  // return representative;
+  /* end code */
+  return representative;
 }
 
 static void add_edge(hash_table_t *hash_table, hash_table_node_t *from, const char *word)
