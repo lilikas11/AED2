@@ -494,42 +494,58 @@ static void similar_words(hash_table_t *hash_table, hash_table_node_t *from)
 
 static int breadh_first_search(int maximum_number_of_vertices, hash_table_node_t **list_of_vertices, hash_table_node_t *origin, hash_table_node_t *goal)
 {
-  /* students code */
-  int r = 0, w = 1;
-  list_of_vertices[0] = origin;
-  origin->previous = NULL;
-  origin->visited = 1;
-  int stop = 0;
-  while (r != w)
-  {
-    adjacency_node_t *node = list_of_vertices[r++]->head;
-    if (stop == 1)
-    {
-      break;
-    }
-    while (node != NULL)
-    {
-      if (node->vertex->visited == 0)
-      {
-        node->vertex->visited = 1;
-        node->vertex->previous = list_of_vertices[r - 1];
-        list_of_vertices[w++] = node->vertex;
-        if (node->vertex == goal)
-        {
-          stop = 1;
-          break;
-        }
-      }
-      node = node->next;
-    }
-  }
-  for (int i = 0; i < w; i++)
-  {
+  // Initialize a queue to hold the nodes that will be visited
+  queue_t *queue = create_queue();
+
+  // Set the visited status of all nodes to 0
+  for (int i = 0; i < maximum_number_of_vertices; i++) {
     list_of_vertices[i]->visited = 0;
   }
-  /* end code */
-  return w;
+
+  // Set the visited status of the starting node to 1
+  origin->visited = 1;
+
+  // Add the starting node to the queue
+  enqueue(queue, origin);
+
+  // While the queue is not empty...
+  while (!is_empty(queue)) {
+    // Remove the first node from the queue
+    hash_table_node_t *current = dequeue(queue);
+
+    // If we have reached the goal, return the distance
+    if (current == goal) {
+      int distance = 0;
+      hash_table_node_t *node = current;
+      while (node != origin) {
+        distance++;
+        node = node->previous;
+      }
+      return distance;
+    }
+
+    // For each unvisited neighbor of the current node...
+    adjacency_node_t *neighbor = current->head;
+    while (neighbor != NULL) {
+      hash_table_node_t *adjacent = neighbor->vertex;
+      if (!adjacent->visited) {
+        // Set the visited status of the neighbor to 1
+        adjacent->visited = 1;
+
+        // Set the parent of the neighbor to the current node
+        adjacent->previous = current;
+
+        // Add the neighbor to the queue
+        enqueue(queue, adjacent);
+      }
+      neighbor = neighbor->next;
+    }
+  }
+
+  // If we reach this point, the goal was not reached
+  return -1;
 }
+
 
 //
 // list all vertices belonging to a connected component (complete this)
