@@ -5,6 +5,7 @@
 //
 // Place your student numbers and names here
 //   N.Mec. 108713  Name: Liliana Ribeiro
+//   N.Mec. 108133  Name: Gonçalo Sousa
 //
 // Do as much as you can
 //   1) MANDATORY: complete the hash table code
