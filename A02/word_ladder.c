@@ -156,72 +156,145 @@ unsigned int crc32(const char *str)
 // hash_table_create is a function that returns a empty table with size 107
 static hash_table_t *hash_table_create(void)
 {
+
   hash_table_t *hash_table;
   unsigned int i;
 
   hash_table = (hash_table_t *)malloc(sizeof(hash_table_t));
-  if (hash_table == NULL)
+  if(hash_table == NULL)
   {
-    fprintf(stderr, "create_hash_table: out of memory\n");
+    fprintf(stderr,"create_hash_table: out of memory\n");
     exit(1);
   }
 
-  /* students code */
-  // choose size for the hash table (prime number)
-  unsigned int size = 107;
-
-  // save hash table atributes
-  hash_table->hash_table_size = size;
+  // initialize the hash table
+  hash_table->hash_table_size = 103u;
   hash_table->number_of_entries = 0u;
   hash_table->number_of_edges = 0u;
+  hash_table->heads = (hash_table_node_t **)malloc(hash_table->hash_table_size * sizeof(hash_table_node_t *));
+  
+  // check for out of memory
+  if(hash_table->heads == NULL)
+  {
+    fprintf(stderr,"create_hash_table: out of memory\n");
+    exit(1);
+  }
 
-  hash_table->heads = (hash_table_node_t **)malloc(size * sizeof(hash_table->heads));
-  memset(hash_table->heads, 0, hash_table->hash_table_size * sizeof(hash_table->heads));
+  // fill the hash table with NULL pointers
 
-  /* end code */
+  for(i = 0u;i < hash_table->hash_table_size;i++){
+    hash_table->heads[i] = NULL;
+  }
+
   return hash_table;
+
+//   hash_table_t *hash_table;
+//   unsigned int i;
+
+//   hash_table = (hash_table_t *)malloc(sizeof(hash_table_t));
+//   if (hash_table == NULL)
+//   {
+//     fprintf(stderr, "create_hash_table: out of memory\n");
+//     exit(1);
+//   }
+
+//   /* students code */
+//   // choose size for the hash table (prime number)
+//   unsigned int size = 107;
+
+//   // save hash table atributes
+//   hash_table->hash_table_size = size;
+//   hash_table->number_of_entries = 0u;
+//   hash_table->number_of_edges = 0u;
+
+//   hash_table->heads = (hash_table_node_t **)malloc(size * sizeof(hash_table->heads));
+//   memset(hash_table->heads, 0, hash_table->hash_table_size * sizeof(hash_table->heads));
+
+//   /* end code */
+//   return hash_table;
 }
 
 // hash_table_grow is a function that double the size of an hash_table preserving the old heads
 static void hash_table_grow(hash_table_t *hash_table)
 {
   /* students code */
-  // variables to save old and new values
-  hash_table_node_t **heads, **new_heads;
+  hash_table_node_t **old_heads, **new_heads;
   hash_table_node_t *node, *next_node;
-  unsigned int size, new_size;
-  unsigned int i;
+  unsigned int i, old_hash_table_size;
 
-  // save old values
-  heads = hash_table->heads;
-  size = hash_table->hash_table_size;
+  // save the old hash table
+  old_heads = hash_table->heads;
+  old_hash_table_size = hash_table->hash_table_size;
 
-  // new values (new size -> double the size)
-  new_size = size * 2u;
-  new_heads = (hash_table_node_t **)malloc(new_size * sizeof(hash_table_node_t *));
-
-  for (i = 0u; i < new_size; i++)
+  // double the size of the hash table
+  hash_table->hash_table_size *= 2u;
+  new_heads = (hash_table_node_t **)malloc(hash_table->hash_table_size * sizeof(hash_table_node_t *));
+  // check for out of memory
+  for (i = 0u; i < hash_table->hash_table_size; i++)
     new_heads[i] = NULL;
 
   if (new_heads == NULL)
   {
-    fprintf(stderr, "hash_table_grow: out of memory\n");
+    fprintf(stderr, "hash_table_grow: out of memory");
     exit(1);
   }
 
-  // do the hash function for the new size (and save on new_heads)
-  // go throught all the heads and replace them for the new hash function calculate
-  for (i = 0u; i < size; i++)
-    for (node = heads[i]; node != NULL; node = next_node)
+  // run the hash function for old values with new size
+
+  for (i = 0u; i < old_hash_table_size; i++)
+  {
+    node = old_heads[i];
+    while (node != NULL)
     {
+
       next_node = node->next;
-      node->next = new_heads[crc32(node->word) % new_size];
-      new_heads[crc32(node->word) % new_size] = node;
+
+      size_t index = crc32(node->word) % hash_table->hash_table_size;
+      node->next = new_heads[index];
+      new_heads[index] = node;
+
+      node = next_node;
     }
-  // replace hash table old values (size e head) for new values
-  free(heads);
-  hash_table->hash_table_size = new_size;
+  }
+  free(old_heads);
   hash_table->heads = new_heads;
+  /*aiiiiiiiiii*/
+  // // variables to save old and new values
+  // hash_table_node_t **heads, **new_heads;
+  // hash_table_node_t *node, *next_node;
+  // unsigned int size, new_size;
+  // unsigned int i;
+
+  // // save old values
+  // heads = hash_table->heads;
+  // size = hash_table->hash_table_size;
+
+  // // new values (new size -> double the size)
+  // new_size = size * 2u;
+  // new_heads = (hash_table_node_t **)malloc(new_size * sizeof(hash_table_node_t *));
+
+  // for (i = 0u; i < new_size; i++)
+  //   new_heads[i] = NULL;
+
+  // if (new_heads == NULL)
+  // {
+  //   fprintf(stderr, "hash_table_grow: out of memory\n");
+  //   exit(1);
+  // }
+
+  // // do the hash function for the new size (and save on new_heads)
+  // // go throught all the heads and replace them for the new hash function calculate
+  // for (i = 0u; i < size; i++)
+  //   for (node = heads[i]; node != NULL; node = next_node)
+  //   {
+  //     next_node = node->next;
+  //     node->next = new_heads[crc32(node->word) % new_size];
+  //     new_heads[crc32(node->word) % new_size] = node;
+  //   }
+  // // replace hash table old values (size e head) for new values
+  // free(heads);
+  // hash_table->hash_table_size = new_size;
+  // hash_table->heads = new_heads;
   /* end code */
 }
 
@@ -229,88 +302,144 @@ static void hash_table_grow(hash_table_t *hash_table)
 static void hash_table_free(hash_table_t *hash_table)
 {
   /* students code */
-  unsigned int i;
   hash_table_node_t *node, *next_node;
-  adjacency_node_t *adj_node, *next_adj_node;
-  // Iterate over all the elements in the hash table
+  unsigned int i;
   for (i = 0u; i < hash_table->hash_table_size; i++)
   {
-    // Free the linked list of hash table nodes
     node = hash_table->heads[i];
-    while (node)
+    while (node != NULL)
     {
-      next_node = node->next;
-      // Free the linked list of adjacency nodes
-      adj_node = node->head;
-      while (adj_node)
+      adjacency_node_t *adjNode = node->head, *tempAdjNode;
+      while (adjNode != NULL)
       {
-        next_adj_node = adj_node->next;
-        free(adj_node);
-        adj_node = next_adj_node;
+        tempAdjNode = adjNode->next;
+        free_adjacency_node(adjNode);
+        adjNode = tempAdjNode;
       }
-      free(node);
+      next_node = node->next;
+      free_hash_table_node(node);
       node = next_node;
     }
-    /* end code */
   }
 
-  // Free the array of linked list heads
   free(hash_table->heads);
-
-  // Free the hash table structure itself
   free(hash_table);
+  /* aiiiiiiiiiiiiiiiiiiiiii */
+  // unsigned int i;
+  // hash_table_node_t *node, *next_node;
+  // adjacency_node_t *adj_node, *next_adj_node;
+  // // Iterate over all the elements in the hash table
+  // for (i = 0u; i < hash_table->hash_table_size; i++)
+  // {
+  //   // Free the linked list of hash table nodes
+  //   node = hash_table->heads[i];
+  //   while (node)
+  //   {
+  //     next_node = node->next;
+  //     // Free the linked list of adjacency nodes
+  //     adj_node = node->head;
+  //     while (adj_node)
+  //     {
+  //       next_adj_node = adj_node->next;
+  //       free(adj_node);
+  //       adj_node = next_adj_node;
+  //     }
+  //     free(node);
+  //     node = next_node;
+  //   }
+  //   /* end code */
+  // }
+
+  // // Free the array of linked list heads
+  // free(hash_table->heads);
+
+  // // Free the hash table structure itself
+  // free(hash_table);
 }
 
 static hash_table_node_t *find_word(hash_table_t *hash_table, const char *word, int insert_if_not_found)
 {
+
   hash_table_node_t *node;
   unsigned int i;
 
   i = crc32(word) % hash_table->hash_table_size;
-
-  /* studants code */
-  // Search the linked list at the corresponding index in the hash table array for a node with the same word
   node = hash_table->heads[i];
   while (node != NULL)
   {
     if (strcmp(node->word, word) == 0)
-    {
-      // Return a pointer to the node if the word is found
       return node;
-    }
     node = node->next;
   }
 
-  // If the insert_if_not_found flag is set, insert a new node with the word
   if (insert_if_not_found && strlen(word) < _max_word_size_)
   {
     node = allocate_hash_table_node();
     strncpy(node->word, word, _max_word_size_);
-    node->next = hash_table->heads[i]; // 2
-    // Initialize the vertex data
-    node->head = NULL;     // 7
-    node->visited = 0;     // 6
-    node->previous = NULL; // 3
-    // Initialize the union find data
-    node->representative = node;  // 1
-    node->number_of_vertices = 1; // 5
-    node->number_of_edges = 0;    // 4
-    // save values and incremente entries
-    hash_table->heads[i] = node;     // 8
-    hash_table->number_of_entries++; // 9
-    // grow if needs
+    node->representative = node;
+    node->next = hash_table->heads[i];
+    node->previous = NULL;
+    node->number_of_edges = 0;
+    node->number_of_vertices = 1;
+    node->visited = 0;
+    node->head = NULL;
+    hash_table->heads[i] = node;
+    hash_table->number_of_entries++;
     if (hash_table->number_of_entries > hash_table->hash_table_size)
-    {
       hash_table_grow(hash_table);
-    }
+    return node;
   }
-  else
-  {
-    // Return NULL if the word is not found and the insert_if_not_found flag is not set
-    return NULL;
-  }
-  // Return a pointer to the newly inserted node if the insert_if_not_found flag is set
-  return node;
+
+  return NULL;
+  /* aiiiiiiiiiiiiiiiiiiiiiii */
+  // hash_table_node_t *node;
+  // unsigned int i;
+
+  // i = crc32(word) % hash_table->hash_table_size;
+
+  // /* studants code */
+  // // Search the linked list at the corresponding index in the hash table array for a node with the same word
+  // node = hash_table->heads[i];
+  // while (node != NULL)
+  // {
+  //   if (strcmp(node->word, word) == 0)
+  //   {
+  //     // Return a pointer to the node if the word is found
+  //     return node;
+  //   }
+  //   node = node->next;
+  // }
+
+  // // If the insert_if_not_found flag is set, insert a new node with the word
+  // if (insert_if_not_found && strlen(word) < _max_word_size_)
+  // {
+  //   node = allocate_hash_table_node();
+  //   strncpy(node->word, word, _max_word_size_);
+  //   node->next = hash_table->heads[i]; // 2
+  //   // Initialize the vertex data
+  //   node->head = NULL;     // 7
+  //   node->visited = 0;     // 6
+  //   node->previous = NULL; // 3
+  //   // Initialize the union find data
+  //   node->representative = node;  // 1
+  //   node->number_of_vertices = 1; // 5
+  //   node->number_of_edges = 0;    // 4
+  //   // save values and incremente entries
+  //   hash_table->heads[i] = node;     // 8
+  //   hash_table->number_of_entries++; // 9
+  //   // grow if needs
+  //   if (hash_table->number_of_entries > hash_table->hash_table_size)
+  //   {
+  //     hash_table_grow(hash_table);
+  //   }
+  // }
+  // else
+  // {
+  //   // Return NULL if the word is not found and the insert_if_not_found flag is not set
+  //   return NULL;
+  // }
+  // // Return a pointer to the newly inserted node if the insert_if_not_found flag is set
+  // return node;
 
   /* end studants code */
 }
@@ -321,6 +450,18 @@ static hash_table_node_t *find_word(hash_table_t *hash_table, const char *word, 
 
 static hash_table_node_t *find_representative(hash_table_node_t *node)
 {
+  hash_table_node_t *Representative, *next_node, *temp_node;
+
+  for (Representative = node; Representative != Representative->representative; Representative = Representative->representative)
+    ;
+
+  for (next_node = node; next_node != Representative; next_node = temp_node)
+  {
+    temp_node = next_node->representative;
+    next_node->representative = Representative;
+  }
+
+  return Representative;
   // hash_table_node_t *representative, *next_node;
 
   // /* students code */
@@ -338,50 +479,103 @@ static hash_table_node_t *find_representative(hash_table_node_t *node)
 
 static void add_edge(hash_table_t *hash_table, hash_table_node_t *from, const char *word)
 {
-//   hash_table_node_t *to, *from_representative, *to_representative;
-//   adjacency_node_t *link;
+   hash_table_node_t *to,*from_representative,*to_representative;
+  adjacency_node_t *linkfrom, *linkto;
 
-//   to = find_word(hash_table, word, 0);
-//   /* students code */
-//   if (to == NULL)
-//     return;
-//   link = allocate_adjacency_node();
-//   if (link == NULL)
-//   {
-//     fprintf(stderr, "add_edge: out of memory\n");
-//     exit(1);
-//   }
-//   link->vertex = to;
-//   link->next = from->head;
-//   from->head = link;
-//   hash_table->number_of_edges++;
+  from_representative = find_representative(from);
+  to = find_word(hash_table,word,0);
+  
+  if(to == NULL || to == from) 
+    return;
+  
+  
+  to_representative = find_representative(to);
+  if (from_representative == to_representative){
+    from_representative->number_of_edges++;
+  } else {
+    if (from_representative->number_of_vertices < to_representative->number_of_vertices)
+    {
+      from_representative->representative = to_representative;
+      to_representative->number_of_vertices += from_representative->number_of_vertices;
+      to_representative->number_of_edges += (from_representative->number_of_edges)+1;
+      from_representative->number_of_edges = 0;
+      from_representative->number_of_vertices = 0;
+    }
+    else
+    {
+      to_representative->representative = from_representative;
+      from_representative->number_of_vertices += to_representative->number_of_vertices;
+      from_representative->number_of_edges += (to_representative->number_of_edges)+1;
+      to_representative->number_of_edges = 0;
+      to_representative->number_of_vertices = 0;
+    }
+  }
+  
 
-//   // atualizar os representantes das componentes conectadas
-//   to_representative = find_representative(to);
-//   from_representative = find_representative(from);
-//   if (from_representative == to_representative)
-//   {
-//     from_representative->number_of_edges++;
-//   }
-//   else
-//   {
-//     if (from_representative->number_of_vertices < to_representative->number_of_vertices)
-//     {
-//       from_representative->representative = to_representative;
-//       to_representative->number_of_vertices += from_representative->number_of_vertices;
-//       to_representative->number_of_edges += (from_representative->number_of_edges) + 1;
-//       from_representative->number_of_edges = 0;
-//       from_representative->number_of_vertices = 0;
-//     }
-//     else
-//     {
-//       to_representative->representative = from_representative;
-//       from_representative->number_of_vertices += to_representative->number_of_vertices;
-//       from_representative->number_of_edges += (to_representative->number_of_edges) + 1;
-//       to_representative->number_of_edges = 0;
-//       to_representative->number_of_vertices = 0;
-//     }
-//   }
+  linkfrom = allocate_adjacency_node();
+  linkto = allocate_adjacency_node();
+
+  if(linkfrom == NULL || linkto == NULL)
+  {
+    fprintf(stderr,"add_edge: out of memory\n");
+    exit(1);
+  }
+  
+  linkfrom->vertex = to;
+  linkfrom->next = from->head;
+  from->head = linkfrom;
+
+  linkto->vertex = from;
+  linkto->next = to->head;
+  to->head = linkto;
+  
+  hash_table->number_of_edges++;
+  return;
+  //njsabadbk kasdbkbjkbjkbjlasbjksbjksbksdbasdbkasdbjkabjkas
+  // hash_table_node_t *to, *from_representative, *to_representative;
+  // adjacency_node_t *link;
+
+  // to = find_word(hash_table, word, 0);
+  // /* students code */
+  // if (to == NULL)
+  //   return;
+  // link = allocate_adjacency_node();
+  // if (link == NULL)
+  // {
+  //   fprintf(stderr, "add_edge: out of memory\n");
+  //   exit(1);
+  // }
+  // link->vertex = to;
+  // link->next = from->head;
+  // from->head = link;
+  // hash_table->number_of_edges++;
+
+  // // atualizar os representantes das componentes conectadas
+  // to_representative = find_representative(to);
+  // from_representative = find_representative(from);
+  // if (from_representative == to_representative)
+  // {
+  //   from_representative->number_of_edges++;
+  // }
+  // else
+  // {
+  //   if (from_representative->number_of_vertices < to_representative->number_of_vertices)
+  //   {
+  //     from_representative->representative = to_representative;
+  //     to_representative->number_of_vertices += from_representative->number_of_vertices;
+  //     to_representative->number_of_edges += (from_representative->number_of_edges) + 1;
+  //     from_representative->number_of_edges = 0;
+  //     from_representative->number_of_vertices = 0;
+  //   }
+  //   else
+  //   {
+  //     to_representative->representative = from_representative;
+  //     from_representative->number_of_vertices += to_representative->number_of_vertices;
+  //     from_representative->number_of_edges += (to_representative->number_of_edges) + 1;
+  //     to_representative->number_of_edges = 0;
+  //     to_representative->number_of_vertices = 0;
+  //   }
+  // }
   /* end code */
 }
 
