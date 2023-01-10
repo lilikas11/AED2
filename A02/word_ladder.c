@@ -157,30 +157,30 @@ unsigned int crc32(const char *str)
 // hash_table_create is a function that returns a empty table with size 107
 static hash_table_t *hash_table_create(void)
 {
-    hash_table_t *hash_table;
-    unsigned int i;
+  hash_table_t *hash_table;
+  unsigned int i;
 
-    hash_table = (hash_table_t *)malloc(sizeof(hash_table_t));
-    if (hash_table == NULL)
-    {
-      fprintf(stderr, "create_hash_table: out of memory\n");
-      exit(1);
-    }
+  hash_table = (hash_table_t *)malloc(sizeof(hash_table_t));
+  if (hash_table == NULL)
+  {
+    fprintf(stderr, "create_hash_table: out of memory\n");
+    exit(1);
+  }
 
-    /* students code */
-    // choose size for the hash table (prime number)
-    unsigned int size = 107;
+  /* students code */
+  // choose size for the hash table (prime number)
+  unsigned int size = 107;
 
-    // save hash table atributes
-    hash_table->hash_table_size = size;
-    hash_table->number_of_entries = 0u;
-    hash_table->number_of_edges = 0u;
+  // save hash table atributes
+  hash_table->hash_table_size = size;
+  hash_table->number_of_entries = 0u;
+  hash_table->number_of_edges = 0u;
 
-    hash_table->heads = (hash_table_node_t **)malloc(size * sizeof(hash_table->heads));
-    memset(hash_table->heads, 0, hash_table->hash_table_size * sizeof(hash_table->heads));
+  hash_table->heads = (hash_table_node_t **)malloc(size * sizeof(hash_table->heads));
+  memset(hash_table->heads, 0, hash_table->hash_table_size * sizeof(hash_table->heads));
 
-    /* end code */
-    return hash_table;
+  /* end code */
+  return hash_table;
 }
 
 // hash_table_grow is a function that double the size of an hash_table preserving the old heads
@@ -340,103 +340,66 @@ static hash_table_node_t *find_representative(hash_table_node_t *node)
 static void add_edge(hash_table_t *hash_table, hash_table_node_t *from, const char *word)
 {
   hash_table_node_t *to, *from_representative, *to_representative;
-  adjacency_node_t *linkfrom, *linkto;
+  adjacency_node_t *link;
 
-  from_representative = find_representative(from);
   to = find_word(hash_table, word, 0);
-
-  if (to == NULL || to == from)
+  /* students code */
+  if (to == NULL)
     return;
-
+  if (from == NULL)
+    return;
+  // atualizar os representantes das componentes conectadas
+  from_representative = find_representative(from);
   to_representative = find_representative(to);
-  if (from_representative == to_representative)
+  if (from_representative != to_representative)
   {
-    from_representative->number_of_edges++;
+    // se for menor
+    if (from_representative->number_of_vertices < to_representative->number_of_vertices)
+    {
+      to_representative->number_of_vertices += from_representative->number_of_vertices;
+      from_representative->representative = to_representative;
+      from_representative->number_of_edges++;
+      from->representative = to_representative;
+    }
+    else
+    { // se for maior ou igual
+      from_representative->number_of_vertices += to_representative->number_of_vertices;
+      to_representative->representative = from_representative;
+      to->representative = from_representative;
+    }
   }
   else
   {
-    if (from_representative->number_of_vertices < to_representative->number_of_vertices)
-    {
-      from_representative->representative = to_representative;
-      to_representative->number_of_vertices += from_representative->number_of_vertices;
-      to_representative->number_of_edges += (from_representative->number_of_edges) + 1;
-      from_representative->number_of_edges = 0;
-      from_representative->number_of_vertices = 0;
-    }
-    else
-    {
-      to_representative->representative = from_representative;
-      from_representative->number_of_vertices += to_representative->number_of_vertices;
-      from_representative->number_of_edges += (to_representative->number_of_edges) + 1;
-      to_representative->number_of_edges = 0;
-      to_representative->number_of_vertices = 0;
-    }
+    // se a representação das palavras for igual
+    from_representative->number_of_edges++;
   }
 
-  linkfrom = allocate_adjacency_node();
-  linkto = allocate_adjacency_node();
-
-  if (linkfrom == NULL || linkto == NULL)
+  // adicionar link ao node e atualizar a lista de links
+  // from
+  link = allocate_adjacency_node();
+  if (link == NULL)
   {
     fprintf(stderr, "add_edge: out of memory\n");
     exit(1);
   }
+  link->vertex = to;
+  link->next = from->head;
+  from->head = link;
 
-  linkfrom->vertex = to;
-  linkfrom->next = from->head;
-  from->head = linkfrom;
+  // to
+  link = allocate_adjacency_node();
+  if (link == NULL)
+  {
+    fprintf(stderr, "add_edge: out of memory\n");
+    exit(1);
+  }
+  link->vertex = from;
+  link->next = to->head;
+  to->head = link;
 
-  linkto->vertex = from;
-  linkto->next = to->head;
-  to->head = linkto;
-
+  // save que temos mais um edge
   hash_table->number_of_edges++;
   return;
-  // njsabadbk kasdbkbjkbjkbjlasbjksbjksbksdbasdbkasdbjkabjkas
-  //  hash_table_node_t *to, *from_representative, *to_representative;
-  //  adjacency_node_t *link;
-
-  // to = find_word(hash_table, word, 0);
-  // /* students code */
-  // if (to == NULL)
-  //   return;
-  // link = allocate_adjacency_node();
-  // if (link == NULL)
-  // {
-  //   fprintf(stderr, "add_edge: out of memory\n");
-  //   exit(1);
-  // }
-  // link->vertex = to;
-  // link->next = from->head;
-  // from->head = link;
-  // hash_table->number_of_edges++;
-
-  // // atualizar os representantes das componentes conectadas
-  // to_representative = find_representative(to);
-  // from_representative = find_representative(from);
-  // if (from_representative == to_representative)
-  // {
-  //   from_representative->number_of_edges++;
-  // }
-  // else
-  // {
-  //   if (from_representative->number_of_vertices < to_representative->number_of_vertices)
-  //   {
-  //     from_representative->representative = to_representative;
-  //     to_representative->number_of_vertices += from_representative->number_of_vertices;
-  //     to_representative->number_of_edges += (from_representative->number_of_edges) + 1;
-  //     from_representative->number_of_edges = 0;
-  //     from_representative->number_of_vertices = 0;
-  //   }
-  //   else
-  //   {
-  //     to_representative->representative = from_representative;
-  //     from_representative->number_of_vertices += to_representative->number_of_vertices;
-  //     from_representative->number_of_edges += (to_representative->number_of_edges) + 1;
-  //     to_representative->number_of_edges = 0;
-  //     to_representative->number_of_vertices = 0;
-  //   }
-  // }
   /* end code */
 }
 
