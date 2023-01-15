@@ -233,15 +233,13 @@ static void hash_table_free(hash_table_t *hash_table)
   unsigned int i;
   hash_table_node_t *node, *next_node;
   adjacency_node_t *adj_node, *next_adj_node;
-  // Iterate over all the elements in the hash table
+  // Itera sobre todos os elementos na hash table 
   for (i = 0u; i < hash_table->hash_table_size; i++)
   {
-    // Free the linked list of hash table nodes
     node = hash_table->heads[i];
     while (node)
     {
       next_node = node->next;
-      // Free the linked list of adjacency nodes
       adj_node = node->head;
       while (adj_node)
       {
@@ -255,10 +253,9 @@ static void hash_table_free(hash_table_t *hash_table)
     /* end code */
   }
 
-  // Free the array of linked list heads
   free(hash_table->heads);
 
-  // Free the hash table structure itself
+  // liberta a estrutura da hash table
   free(hash_table);
 }
 
@@ -270,36 +267,32 @@ static hash_table_node_t *find_word(hash_table_t *hash_table, const char *word, 
   i = crc32(word) % hash_table->hash_table_size;
 
   /* studants code */
-  // Search the linked list at the corresponding index in the hash table array for a node with the same word
   node = hash_table->heads[i];
   while (node != NULL)
   {
     if (strcmp(node->word, word) == 0)
     {
-      // Return a pointer to the node if the word is found
+      // retorna um apontador para o nó se a palavra for encontrada 
       return node;
     }
     node = node->next;
   }
 
-  // If the insert_if_not_found flag is set, insert a new node with the word
   if (insert_if_not_found && strlen(word) < _max_word_size_)
   {
     node = allocate_hash_table_node();
     strncpy(node->word, word, _max_word_size_);
-    node->next = hash_table->heads[i]; // 2
-    // Initialize the vertex data
-    node->head = NULL;     // 7
-    node->visited = 0;     // 6
-    node->previous = NULL; // 3
-    // Initialize the union find data
-    node->representative = node;  // 1
-    node->number_of_vertices = 1; // 5
-    node->number_of_edges = 0;    // 4
-    // save values and incremente entries
+    node->next = hash_table->heads[i]; 
+    node->head = NULL;     
+    node->visited = 0;     
+    node->previous = NULL; 
+    node->representative = node;  
+    node->number_of_vertices = 1; 
+    node->number_of_edges = 0;   
+    // guarda os valores e incrementa as entradas
     hash_table->heads[i] = node;     // 8
     hash_table->number_of_entries++; // 9
-    // grow if needs
+    // cresce, caso necessário
     if (hash_table->number_of_entries > hash_table->hash_table_size)
     {
       hash_table_grow(hash_table);
@@ -307,10 +300,10 @@ static hash_table_node_t *find_word(hash_table_t *hash_table, const char *word, 
   }
   else
   {
-    // Return NULL if the word is not found and the insert_if_not_found flag is not set
+    // caso a palavra não for encontrada e insert_if_not_found não estiver definida 
     return NULL;
   }
-  // Return a pointer to the newly inserted node if the insert_if_not_found flag is set
+  // retorna um apontador para o nó se insert_if_not_found for definida 
   return node;
 
   /* end studants code */
@@ -325,7 +318,6 @@ static hash_table_node_t *find_representative(hash_table_node_t *node)
   hash_table_node_t *representative, *next_node;
 
   /* students code */
-  // Follow the chain of representatives until the representative of the connected component is found
   representative = node;
   next_node = node->representative;
   while (next_node != representative)
@@ -532,12 +524,12 @@ static int breadh_first_search(int maximum_number_of_vertices, hash_table_node_t
       break;
     }
   }
-  // Reset the visited status of the vertices
+  // Reseta o estado visitado do vértice 
   for (int i = 0; i < write_index; i++)
   {
     list_of_vertices[i]->visited = 0;
   }
-  // return number of vertices visited
+  // retorna o número de vértices visitados 
   return write_index;
 }
 
