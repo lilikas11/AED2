@@ -506,7 +506,7 @@ static int breadh_first_search(int maximum_number_of_vertices, hash_table_node_t
     if (read_index != write_index)
     {
       adjacency_node_t *link = list_of_vertices[read_index]->head;
-      //proximo vertice a ler
+      // proximo vertice a ler
       read_index++;
       while (link != NULL)
       {
@@ -548,37 +548,26 @@ static int breadh_first_search(int maximum_number_of_vertices, hash_table_node_t
 static void list_connected_component(hash_table_t *hash_table, const char *word)
 {
   /* students code */
-  hash_table_node_t *node, *rep;
-  int i, n, maximum_number_of_vertices;
-  hash_table_node_t **list_of_vertices;
-
-  node = find_word(hash_table, word, 0);
-
-  if (node == NULL)
+  hash_table_node_t *origin = find_word(hash_table, word, 0);
+  // se a palavra não existir
+  if (origin == NULL)
   {
     printf("list_connected_component: word not found\n");
     return;
   }
-
-  rep = find_representative(node);
-  maximum_number_of_vertices = rep->number_of_vertices;
-  list_of_vertices = (hash_table_node_t **)malloc(maximum_number_of_vertices * sizeof(hash_table_node_t *));
-
-  if (list_of_vertices == NULL)
+  // se a palavra existir
+  unsigned int count = 0, numberV;
+  unsigned int maximum_number_of_vertices = find_representative(origin)->number_of_vertices;
+  // get some space to creat our list
+  hash_table_node_t **list_of_vertices = malloc(sizeof(hash_table_node_t *) * maximum_number_of_vertices);
+  // this function is for option 1 so there is no goal :)
+  numberV = breadh_first_search(maximum_number_of_vertices, list_of_vertices, origin, NULL);
+  // print todos os vertices
+  for (count; count < numberV; count++)
   {
-    fprintf(stderr, "list_connected_component: out of memory\n");
-    exit(1);
-  }
-
-  n = breadh_first_search(maximum_number_of_vertices, list_of_vertices, node, NULL);
-  int count = 0;
-  for (i = 0; i < n; i++)
-  {
-    printf("%d: %s\n", count, list_of_vertices[i]->word);
-    count++;
+    printf("%d. %s\n", count, list_of_vertices[count]->word);
   }
   free(list_of_vertices);
-
   /* end code */
 }
 
@@ -659,19 +648,19 @@ static void graph_info(hash_table_t *hash_table)
   //
 }
 
-static void print_list(hash_table_t *hash_table)
+// this function prints the hash table to test it just uncomment it on main
+static void print_hash_table(hash_table_t *hash_table)
 {
-  for (size_t i = 0; i < hash_table->hash_table_size; i++)
+  for (unsigned int i = 0; i < hash_table->hash_table_size; i++)
   {
-    hash_table_node_t *p = hash_table->heads[i];
-    if (p == NULL)
-      continue;
-    while (p != NULL)
+    printf("Space %d: ", i);
+    hash_table_node_t *current = hash_table->heads[i];
+    while (current != NULL)
     {
-      printf("%s ", p->word);
-      p = p->next;
+      printf("%s -> ", current->word);
+      current = current->next;
     }
-    printf("\n");
+    printf("NULL\n");
   }
   return;
 }
@@ -706,6 +695,7 @@ int main(int argc, char **argv)
     for (node = hash_table->heads[i]; node != NULL; node = node->next)
       similar_words(hash_table, node);
   graph_info(hash_table);
+  //print_hash_table(hash_table);
   // ask what to do
   for (;;)
   {
