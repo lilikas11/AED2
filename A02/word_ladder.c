@@ -545,6 +545,7 @@ static int breadh_first_search(int maximum_number_of_vertices, hash_table_node_t
 // list all vertices belonging to a connected component (complete this)
 //
 
+// option 1
 static void list_connected_component(hash_table_t *hash_table, const char *word)
 {
   /* students code */
@@ -592,40 +593,29 @@ static int connected_component_diameter(hash_table_node_t *node)
 // find the shortest path from a given word to another given word (to be done)
 //
 
+// option 2
 static void path_finder(hash_table_t *hash_table, const char *from_word, const char *to_word)
 {
   /* students code */
-  hash_table_node_t *fromNode, *fromRep, *toNode, *toRep;
-  fromNode = find_word(hash_table, from_word, 0);
-  toNode = find_word(hash_table, to_word, 0);
-
-  if (fromNode == NULL || toNode == NULL)
+  // basicamente we do the same thing has list_connected_component but with a goal
+  hash_table_node_t *goal = find_word(hash_table, from_word, 0);
+  hash_table_node_t *origin = find_word(hash_table, to_word, 0);
+  // se a palavra não existir
+  if (origin == NULL)
   {
-    printf("One of the words is not in the dictionary\n");
+    printf("list_connected_component: word not found\n");
     return;
   }
-
-  fromRep = find_representative(fromNode);
-  toRep = find_representative(toNode);
-
-  if (fromRep != toRep)
-  {
-    printf("The words are not in the same connected component, so there's no path between them.\n");
-    return;
-  }
-
-  hash_table_node_t **list_of_vertices = malloc(sizeof(hash_table_node_t *) * fromRep->number_of_vertices);
-
-  if (list_of_vertices == NULL)
-  {
-    fprintf(stderr, "path_finder: malloc failed\n");
-    exit(1);
-  }
-
-  int goalIndex = breadh_first_search(fromRep->number_of_vertices, list_of_vertices, toNode, fromNode);
-
-  hash_table_node_t *p = list_of_vertices[goalIndex - 1];
-  int count = 0;
+  // se a palavra existir
+  unsigned int count = 0, numberV;
+  unsigned int maximum_number_of_vertices = find_representative(origin)->number_of_vertices;
+  // get some space to creat our list
+  hash_table_node_t **list_of_vertices = malloc(sizeof(hash_table_node_t *) * maximum_number_of_vertices);
+  // this function is for option 1 so there is no goal :)
+  numberV = breadh_first_search(maximum_number_of_vertices, list_of_vertices, origin, goal);
+  // print todos os vertices
+  unsigned int n = numberV - 1;
+  hash_table_node_t *p = list_of_vertices[numberV - 1];
   while (p != NULL)
   {
     printf("%d: %s \n", count, p->word);
@@ -695,8 +685,8 @@ int main(int argc, char **argv)
     for (node = hash_table->heads[i]; node != NULL; node = node->next)
       similar_words(hash_table, node);
   graph_info(hash_table);
-  //print_hash_table(hash_table);
-  // ask what to do
+  // print_hash_table(hash_table);
+  //  ask what to do
   for (;;)
   {
     fprintf(stderr, "Your wish is my command:\n");
